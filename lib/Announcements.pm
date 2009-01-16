@@ -4,6 +4,7 @@ use warnings;
 
 use Announcements::Announcement;
 use Announcements::Announcer;
+use Announcements::SubscriptionCollection;
 use Announcements::SubscriptionRegistry;
 
 use version; our $VERSION = qv('0.0.1');
