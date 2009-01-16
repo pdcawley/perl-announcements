@@ -6,8 +6,9 @@ class Announcements::Subscription {
     use version; our $VERSION = qv('0.0.1');
     use Announcements::TypeDefs qw(Announcement AnnouncementClass);
 
-    has 'action'    => (is => 'rw', isa => 'CodeRef');
-    has 'announcer' => (is => 'rw', isa => 'Announcements::Announcer');
+    has 'action'             => (is => 'rw', isa => 'CodeRef');
+    has 'announcer'          => (is => 'rw', isa => 'Object');
+    has 'subscriber'         => (is => 'rw', isa => 'Object');
     has 'announcement_class' => (
         is  => 'rw',
         isa => AnnouncementClass,
@@ -15,6 +16,10 @@ class Announcements::Subscription {
 
     method value (Announcement $announcement) {
         $self->action->($announcement, $self->announcer);
+    }
+
+    method is_complete {
+        $self->action && $self->announcer && $self->announcement_class && $self->subscriber;
     }
 }
 __END__

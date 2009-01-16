@@ -3,8 +3,19 @@ use Announcements::Subscription;
 use Announcements::Exceptions;
 
 class Announcements::SubscriptionRegistry {
-    method register ($sub) {
-        die Announcements::IncompleteSubscriptionError->new();
+    has 'subscriptions'      => (
+        is => 'rw',
+        isa => 'ArrayRef[Announcements::Subscription]',
+        default => sub { [] },
+    );
+
+    method register (Announcements::Subscription $subscription) {
+        $subscription->is_complete or die Announcements::IncompleteSubscriptionError->new();
+        push @{$self->subscriptions}, $subscription;
+    }
+
+    method subscriptions_for (AnnouncementClass $ac) {
+        @{$self->subscriptions};
     }
 }
 
