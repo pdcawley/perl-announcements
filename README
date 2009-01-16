@@ -1,19 +1,15 @@
 Announcement version 0.0.1
 
-[ REPLACE THIS...
+Danger, Will Robinson. This is very much alpha quality. Right now it passes
+its tests, but doesn't actually do anything. And even to pass its tests it
+needs dependencies that aren't really properly covered in Makefile.PL. In
+particular, you'll need to install rafl's gitub versions of:
 
-  The README is used to introduce the module and provide instructions on
-  how to install the module, any machine dependencies it may have (for
-  example C compilers and installed libraries) and any other information
-  that should be understood before the module is installed.
+parse-method-signatures  - git://github.com/rafl/parse-method-signatures.git
+moosex-method-signatures - git://github.com/rafl/moosex-methods-signatures.git
 
-  A README file is required for CPAN modules since CPAN extracts the
-  README file from a module distribution so that people browsing the
-  archive can use it get an idea of the modules uses. It is usually a
-  good idea to provide version information here so that people can
-  decide whether fixes for the module are worth downloading.
-]
-
+If you think of this package as a five finger exercise by someone relearning
+in public, you won't go far wrong.
 
 INSTALLATION
 
@@ -25,18 +21,12 @@ To install this module, run the following commands:
     make install
 
 
-Alternatively, to install with Module::Build, you can use the following commands:
-
-    perl Build.PL
-    ./Build
-    ./Build test
-    ./Build install
-
-
-
 DEPENDENCIES
 
-None.
+See above, but also
+
+MooseX::Declare
+Test::Class
 
 
 COPYRIGHT AND LICENCE
