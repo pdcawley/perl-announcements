@@ -1,0 +1,25 @@
+---
+abstract: 'A Smalltalk style announcements framework'
+author:
+  - 'Piers Cawley  C<< <pdcawley@bofh.org.uk> >>'
+distribution_type: module
+generated_by: 'Module::Install version 0.77'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Announcements
+no_index:
+  directory:
+    - inc
+    - t
+requires:
+  MooseX::Declare: 0
+  MooseX::Method::Signatures: 0.06
+  Test::Class: 0
+  Test::More: 0
+  version: 0
+resources:
+  license: http://dev.perl.org/licenses/
+  repository: git:://github.com/pdcawley/perl-announcements.git
+version: 0.000001

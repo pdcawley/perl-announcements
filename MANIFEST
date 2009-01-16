@@ -1,0 +1,18 @@
+Build.PL
+Changes
+MANIFEST
+META.yml # Will be created by "make dist"
+Makefile.PL
+README
+lib/Announcement.pm
+lib/Announcement/DeliveryDestination.pm
+lib/Announcement/Set.pm
+lib/Announcement/Subscription.pm
+lib/Announcement/SubscriptionCollection.pm
+lib/Announcement/SubscriptionRegistry.pm
+lib/Announcement/WeakSubscription.pm
+lib/Announcer.pm
+t/00.load.t
+t/perlcritic.t
+t/pod-coverage.t
+t/pod.t
