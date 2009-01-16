@@ -8,7 +8,7 @@ class Announcements::SubscriptionCollection {
         default => sub { Set::Object->new },
     );
 
-    use overload '<<' => \&_overload_extend;
+    use overload '<<' => \&_overload_extend, fallback => 1;
 
     sub _overload_extend { $_[0]->add_subscription($_[1]); }
 

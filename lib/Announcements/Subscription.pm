@@ -21,6 +21,17 @@ class Announcements::Subscription {
     method is_complete {
         $self->action && $self->announcer && $self->announcement_class && $self->subscriber;
     }
+
+    use overload '<<' => \&_overload_extend, fallback => 1;
+
+    sub _overload_extend {
+        $_[0]->as_collection_with($_[1])
+    }
+
+    method as_collection_with (Announcements::Subscription $other) {
+        my $set = Announcements::SubscriptionCollection->new();
+        $set << $self << $other;
+    }
 }
 __END__
 

@@ -27,4 +27,11 @@ sub test_extension : Test(2) {
     ok $set->contains($sub);
 }
 
+sub test_creation_from_subscriptions : Test(1) {
+    my $set = Announcements::Subscription->new() << Announcements::Subscription->new();
+
+    isa_ok($set => 'Announcements::SubscriptionCollection');
+}
+
+
 __PACKAGE__->runtests unless caller;
