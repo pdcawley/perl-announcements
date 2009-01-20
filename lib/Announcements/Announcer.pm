@@ -14,14 +14,19 @@ class Announcements::Announcer {
 
     method subscription_class { 'Announcements::Subscription' }
 
-    method when (AnnouncementClass $ac, CodeRef $action) {
-        my $sub = $self->subscription_class->new(
-            action             => $action,
-            announcer          => $self,
-            subscriber         => $action,
-            announcement_class => $ac,
-        );
-        $self->_register($sub);
+    method when ($ac, CodeRef $action) {
+        if (ref($ac) eq 'ARRAY') {
+            $self->when($_, $action) foreach @$ac;
+        }
+        else {
+            my $sub = $self->subscription_class->new(
+                action             => $action,
+                announcer          => $self,
+                subscriber         => $action,
+                announcement_class => $ac,
+            );
+            $self->_register($sub);
+        }
     }
 
     method announce ($announcement) {

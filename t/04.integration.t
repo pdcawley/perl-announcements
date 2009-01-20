@@ -35,3 +35,10 @@ $announcer->announce($ann);
 is $runs => 1;
 is $args[0] => $ann;
 is $args[1] => $announcer;
+
+$runs = 0;
+$announcer = Announcements::Announcer->new;
+$announcer->when([qw(Test03Announcement Announcements::Announcement)],
+                 sub { $runs++ });
+$announcer->announce('Announcements::Announcement');
+is $runs => 2;
