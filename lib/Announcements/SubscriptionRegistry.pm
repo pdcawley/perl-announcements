@@ -1,21 +1,34 @@
 use MooseX::Declare;
 use Announcements::Subscription;
+use Announcements::SubscriptionCollection;
 use Announcements::Exceptions;
 
 class Announcements::SubscriptionRegistry {
-    has 'subscriptions'      => (
-        is => 'rw',
-        isa => 'ArrayRef[Announcements::Subscription]',
-        default => sub { [] },
+    has _subscriptions_by_class => (
+        is => 'ro',
+        isa => 'HashRef[Announcements::SubscriptionCollection]',
+        default => sub { {} },
     );
 
     method register (Announcements::Subscription $subscription) {
         $subscription->is_complete or die Announcements::IncompleteSubscriptionError->new();
-        push @{$self->subscriptions}, $subscription;
+        $self->raw_subscriptions_for($subscription->announcement_class) << $subscription;
+    }
+
+    method raw_subscriptions_for (AnnouncementClass $ac) {
+        $self->_subscriptions_by_class->{$ac}
+            //= Announcements::SubscriptionCollection->new();
     }
 
     method subscriptions_for (AnnouncementClass $ac) {
-        @{$self->subscriptions};
+        my $result = Announcements::SubscriptionCollection->new;
+
+        foreach my $key (keys %{$self->_subscriptions_by_class}) {
+            if ($key->isa($ac)) {
+                $result->add_subscription($_) foreach @{$self->raw_subscriptions_for($key)};
+            }
+        }
+        @{$result};
     }
 }
 

@@ -27,6 +27,34 @@ class Test02Announcer {
 class Test02Subscriber {
 }
 
+class Test02Announcement extends Announcements::Announcement {
+}
+
+sub make_valid_subscription {
+    my($self, $announcement_class, $action) = (@_);
+
+    $announcement_class //= 'Announcements::Announcement';
+    $action //= sub { 1 };
+
+    Announcements::Subscription->new(
+        action             => $action,
+        announcer          => Test02Announcer->new,
+        announcement_class => $announcement_class,
+        subscriber         => Test02Subscriber->new
+    );
+}
+
+sub multiple_announcement_classes : Test(2) {
+    my $self = shift;
+    my $registry = $self->{registry};
+
+    $registry->register($self->make_valid_subscription);
+    $registry->register($self->make_valid_subscription('Test02Announcement'));
+
+    is(+($registry->subscriptions_for('Test02Announcement')), 1);
+    is(+($registry->subscriptions_for('Announcements::Announcement')), 2);
+}
+
 sub test_registering_a_populated_subscription : Test(2) {
     my $self = shift;
     my $registry = $self->{registry};
@@ -44,7 +72,7 @@ sub test_registering_a_populated_subscription : Test(2) {
 
     $registry->register($subscription);
     my @got = $registry->subscriptions_for($announcement_class);
-    is scalar(@got), 1;
+    is +@got, 1;
     is $got[0], $subscription;
 }
 __PACKAGE__->runtests unless caller;
