@@ -33,5 +33,4 @@ sub test_creation_from_subscriptions : Test(1) {
     isa_ok($set => 'Announcements::SubscriptionCollection');
 }
 
-
 __PACKAGE__->runtests unless caller;

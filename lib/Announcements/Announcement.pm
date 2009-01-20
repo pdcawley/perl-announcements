@@ -1,6 +1,10 @@
 use MooseX::Declare;
 
 class Announcements::Announcement {
+    method as_announcement {
+        ref($self) ? $self
+            : $self->new();
+    }
 }
 
 1; # Magic true value required at end of module

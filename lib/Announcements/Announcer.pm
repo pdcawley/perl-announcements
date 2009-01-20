@@ -1,6 +1,32 @@
 use MooseX::Declare;
 
+use Announcements::SubscriptionRegistry;
+use Announcements::Subscription;
+use Announcements::TypeDefs qw(AnnouncementClass);
+
 class Announcements::Announcer {
+    has subscription_registry => (
+        is      => 'ro',
+        isa     => 'Announcements::SubscriptionRegistry',
+        default => sub { Announcements::SubscriptionRegistry->new },
+        handles => {_register => 'register'},
+    );
+
+    method subscription_class { 'Announcements::Subscription' }
+
+    method when (AnnouncementClass $ac, CodeRef $action) {
+        my $sub = $self->subscription_class->new(
+            action             => $action,
+            announcer          => $self,
+            subscriber         => $action,
+            announcement_class => $ac,
+        );
+        $self->_register($sub);
+    }
+
+    method announce ($announcement) {
+        $self->subscription_registry->announce($announcement->as_announcement)
+    }
 }
 
 1; # Magic true value required at end of module

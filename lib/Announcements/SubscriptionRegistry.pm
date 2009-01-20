@@ -28,7 +28,17 @@ class Announcements::SubscriptionRegistry {
                 $result->add_subscription($_) foreach @{$self->raw_subscriptions_for($key)};
             }
         }
-        @{$result};
+        $result;
+    }
+
+    method all_subscriptions {
+        $self->subscriptions_for('Announcements::Announcement');
+    }
+
+    method announce ($ann) {
+        my $class = ref($ann);
+
+        $self->subscriptions_for($class)->announce($ann);
     }
 }
 

@@ -71,7 +71,7 @@ sub test_registering_a_populated_subscription : Test(2) {
     );
 
     $registry->register($subscription);
-    my @got = $registry->subscriptions_for($announcement_class);
+    my @got = @{$registry->subscriptions_for($announcement_class)};
     is +@got, 1;
     is $got[0], $subscription;
 }

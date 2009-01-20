@@ -9,7 +9,8 @@ class Announcements::SubscriptionCollection {
     );
 
     use overload '<<'     => sub { $_[0]->add_subscription($_[1]) },
-                  '@{}'    => sub { $_[0]->as_array },
+                 '@{}'    => sub { $_[0]->as_array },
+                 '0+'     => sub { $_[0]->_subscriptions->size },
                  fallback => 1;
 
     method add_subscription (Announcements::Subscription $sub) {
@@ -23,6 +24,10 @@ class Announcements::SubscriptionCollection {
 
     method as_array {
         [$self->_subscriptions->members];
+    }
+
+    method announce (Announcements::Announcement $ann) {
+        $_->value($ann) foreach @$self;
     }
 }
 
