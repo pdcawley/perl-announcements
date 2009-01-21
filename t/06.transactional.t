@@ -39,7 +39,6 @@ class ValueHolder {
     has value => (
         is => 'rw',
         isa => 'Any',
-    #    initializer => 'init_value',
     );
 
     method announcer () {
@@ -51,27 +50,22 @@ class ValueHolder {
         $self->$set($value);
     }
 
-    {
-        my $value;
     around value ($value?) {
-#        say $orig;
-#        say $new_value;
         say 'around_value 1';
-        return $self->$orig($value) unless $INITIALISING || defined($value);
+        return $orig->($value) unless $INITIALISING || defined($value);
         say 'around_value 2';
-        my $old_value = $self->$orig();
+        my $old_value = $orig->();
         my $about_to_change
-        = AboutToChangeValue->from_to_instance( $old_value, $value, $self);
+            = AboutToChangeValue->from_to_instance( $old_value, $value, $self);
 
         $announcer->announce($about_to_change);
         return if $about_to_change->is_vetoed;
         my $changing =
         ChangingValue->from_to_instance( $old_value, $value, $self);
         $announcer->announce($changing);
-        $self->$orig($changing->$value);
-        $announcer->announce(ChangedValue->from_to_instance( $old_value, $self->$orig(), $self ));
+        $orig->($changing->$value);
+        $announcer->announce(ChangedValue->from_to_instance( $old_value, $orig->(), $self ));
     }
-}
 }
 
 package TransactionalTest;
