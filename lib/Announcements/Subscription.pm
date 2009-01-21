@@ -15,7 +15,7 @@ class Announcements::Subscription {
     );
 
     method value (Announcement $announcement) {
-        $self->action->($announcement, $self->announcer);
+        $self->action->($announcement, $self->announcer, $self->subscriber);
     }
 
     method is_complete {

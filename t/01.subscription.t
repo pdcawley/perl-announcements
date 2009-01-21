@@ -13,7 +13,7 @@ sub make_announcement : Test(setup) {
     shift->{subscription} = Announcements::Subscription->new()
 }
 
-sub test_action_value : Test(3) {
+sub test_action_value : Test(4) {
     my($self) = (@_);
 
     my $sub = $self->subscription;
@@ -28,6 +28,11 @@ sub test_action_value : Test(3) {
     $sub->announcer($announcer);
     $sub->action(sub { $_[1] });
     is $sub->value($ann) => $announcer;
+
+    my $subscriber = {};
+    $sub->subscriber($subscriber);
+    $sub->action(sub { $_[2] });
+    is $sub->value($ann) => $subscriber;
 }
 
 sub test_instantiation : Test(1) {
