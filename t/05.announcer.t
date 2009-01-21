@@ -35,5 +35,4 @@ sub test_when_with_single_class : Test(2) {
     is +$announcer->subscription_registry->all_subscriptions => 1;
     is $announcer->subscription_registry->all_subscriptions->[0]->announcement_class => 'Announcement1';
 }
-
 __PACKAGE__->runtests unless caller;

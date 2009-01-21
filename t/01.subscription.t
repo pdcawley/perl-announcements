@@ -44,8 +44,6 @@ sub test_announcement_class : Test(1) {
     is $sub->announcement_class => 'Announcements::Announcement';
 }
 
-
-
 sub subscription {
     shift->{subscription};
 }
