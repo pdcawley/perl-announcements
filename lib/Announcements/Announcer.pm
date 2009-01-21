@@ -12,7 +12,10 @@ class Announcements::Announcer {
         handles => {_register => 'register'},
     );
 
-    method subscription_class { 'Announcements::Subscription' }
+    has subscription_class => (
+        is      => 'rw',
+        default => 'Announcements::Subscription',
+    );
 
     method when ($ac, CodeRef $action) {
         if (ref($ac) eq 'ARRAY') {
