@@ -17,7 +17,7 @@ class ValueChangeAnnouncement extends Announcements::Announcement {
 }
 
 class AboutToChangeValue extends ValueChangeAnnouncement {
-    has is_vetoed => (is => 'rw', 'isa' => 'String', default => '');
+    has is_vetoed => (is => 'rw', 'isa' => 'Str', default => '');
 
     method veto ($reason = "vetoed") {
         $self->is_vetoed || $self->is_vetoed( $reason ); # First reason wins
@@ -32,7 +32,6 @@ class ChangedValue extends ValueChangeAnnouncement {
 
 class ValueHolder {
     use feature ':5.10';
-    our $INITIALISING = 0;
 
     my $announcer = Announcements::Announcer->new;
 
@@ -45,16 +44,9 @@ class ValueHolder {
         $announcer;
     }
 
-    method init_value ($value, $set) {
-        say 4;
-        $self->$set($value);
-    }
-
-    around value ($value?) {
-        say 'around_value 1';
-        return $orig->($value) unless $INITIALISING || defined($value);
-        say 'around_value 2';
-        my $old_value = $orig->();
+    around value (:$value?) {
+        my $old_value = $self->$orig();
+        return $old_value unless defined($value);
         my $about_to_change
             = AboutToChangeValue->from_to_instance( $old_value, $value, $self);
 
@@ -63,24 +55,33 @@ class ValueHolder {
         my $changing =
         ChangingValue->from_to_instance( $old_value, $value, $self);
         $announcer->announce($changing);
-        $orig->($changing->$value);
-        $announcer->announce(ChangedValue->from_to_instance( $old_value, $orig->(), $self ));
+        $self->$orig($changing->new_value);
+        $announcer->announce(ChangedValue->from_to_instance( $old_value, $self->$orig(), $self ));
     }
 }
 
 package TransactionalTest;
 use feature ':5.10';
-use Test::More tests => 1;
+use Test::More tests => 3;
 
-ValueHolder->announcer->when(
+my $announcer = ValueHolder->announcer;
+$announcer->when(
     AboutToChangeValue => sub {
         my $ann = shift;
         $ann->veto;
     });
 
-say 1;
 my $vh = ValueHolder->new(value => 22);
-say 2;
-say $vh->value;
 is $vh->value() => 22;
-say 3;
+$vh->value(33);
+is $vh->value => 22;
+
+$announcer->forget_subscriptions;
+
+$announcer->when(ChangingValue => sub {
+                     my $ann = shift;
+                     $ann->new_value(uc($ann->new_value));
+                 });
+
+$vh->value(value =>"thingy");
+is $vh->value => "THINGY";
