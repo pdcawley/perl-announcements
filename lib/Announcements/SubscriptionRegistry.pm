@@ -5,7 +5,7 @@ use Announcements::Exceptions;
 
 class Announcements::SubscriptionRegistry {
     has _subscriptions_by_class => (
-        is => 'ro',
+        is => 'rw',
         isa => 'HashRef[Announcements::SubscriptionCollection]',
         default => sub { {} },
     );
@@ -42,7 +42,7 @@ class Announcements::SubscriptionRegistry {
     }
 
     method forget_subscriptions () {
-        %{$self->_subscriptions_by_class} = ();
+        $self->_subscriptions_by_class({});
     }
 }
 
