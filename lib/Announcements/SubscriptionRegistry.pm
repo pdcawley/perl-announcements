@@ -40,6 +40,10 @@ class Announcements::SubscriptionRegistry {
 
         $self->subscriptions_for($class)->announce($ann);
     }
+
+    method forget_subscriptions () {
+        %{$self->_subscriptions_by_class} = ();
+    }
 }
 
 __END__

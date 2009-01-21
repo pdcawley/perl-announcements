@@ -9,7 +9,10 @@ class Announcements::Announcer {
         is      => 'ro',
         isa     => 'Announcements::SubscriptionRegistry',
         default => sub { Announcements::SubscriptionRegistry->new },
-        handles => {_register => 'register'},
+        handles => {
+            _register => 'register',
+            forget_subscriptions => 'forget_subscriptions',
+        },
     );
 
     has subscription_class => (
