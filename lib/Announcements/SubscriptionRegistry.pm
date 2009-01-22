@@ -28,7 +28,8 @@ class Announcements::SubscriptionRegistry {
 
         foreach my $key (keys %{$self->_subscriptions_by_class}) {
             if ($key->isa($ac)) {
-                $result->add_subscription($_) foreach @{$self->raw_subscriptions_for($key)};
+                $self->raw_subscriptions_for($key)
+                  ->each(sub {$result->add_subscription($_)});
             }
         }
         $result;
