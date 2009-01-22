@@ -30,6 +30,15 @@ class ChangingValue extends ValueChangeAnnouncement {
 class ChangedValue extends ValueChangeAnnouncement {
 }
 
+class TransactionalAnnouncement extends Announcements::Announcement {
+}
+
+class Commited extends TransactionalAnnouncement {
+}
+
+class RollingBack extends TransactionalAnnouncement {
+}
+
 class ValueHolder extends Announcements::Announcer {
     use feature ':5.10';
 
@@ -66,7 +75,8 @@ class ValueHolder extends Announcements::Announcer {
 
 package TransactionalTest;
 use feature ':5.10';
-use Test::More tests => 5;
+use Test::More tests => 7;
+use Test::Exception;
 
 my $announcer = ValueHolder->announcer;
 $announcer->when(
@@ -97,3 +107,30 @@ $vh2->value(value => 'mutable');
 is $vh2->value => 'immutable';
 $vh->value(value => 'mutable');
 is $vh->value => 'MUTABLE';
+
+sub transaction (&) {
+    ValueHolder->announcer->when(
+        ChangedValue => sub {
+            my($ann) = shift;
+            $ann->instance->rollback_func(
+                sub { $_->value(value => $ann->old_value) }
+            )
+        },
+        for => 'transaction'
+    );
+
+    my $value = eval { $_[0]->() };
+    my $err = $@;
+    ValueHolder->announcer->unsubscribe('transaction');
+    if ($err) {
+        ValueHolder->announcer->announce('RollingBack');
+        die $err;
+    }
+    else {
+        ValueHolder->announcer->announce('Commited');
+    }
+    $value;
+}
+
+is transaction { 1 } => 1, 'transaction returns block value';
+throws_ok { transaction { die 'deliberately' } } qr/deliberately/, 'transaction should pass any exceptions on';

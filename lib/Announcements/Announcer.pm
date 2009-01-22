@@ -5,6 +5,8 @@ use Announcements::Subscription;
 use Announcements::TypeDefs qw(AnnouncementClass);
 
 class Announcements::Announcer {
+    use feature ':5.10';
+
     has subscription_registry => (
         is      => 'ro',
         isa     => 'Announcements::SubscriptionRegistry',
@@ -29,15 +31,16 @@ class Announcements::Announcer {
         'Announcements::Subscription';
     }
 
-    method when ($ac, CodeRef $action) {
+    method when ($ac, CodeRef $action, :$for?) {
+        $for //= $action;
         if (ref($ac) eq 'ARRAY') {
-            $self->when($_, $action) foreach @$ac;
+            $self->when($_, $action, $for) foreach @$ac;
         }
         else {
             my $sub = $self->subscription_class->new(
                 action             => $action,
                 announcer          => $self,
-                subscriber         => $action,
+                subscriber         => $for,
                 announcement_class => $ac,
             );
             $self->_register($sub);
@@ -48,6 +51,11 @@ class Announcements::Announcer {
         $announcement = $announcement->as_announcement;
         $self->subscription_registry->announce($announcement);
         return $announcement;
+    }
+
+    method unsubscribe ($subscriber) {
+        my $registry = $self->subscription_registry;
+        $registry->remove_subscriptions($registry->subscriptions_of($subscriber));
     }
 }
 __END__

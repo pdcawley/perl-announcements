@@ -8,7 +8,7 @@ class Announcements::Subscription {
 
     has 'action'             => (is => 'rw', isa => 'CodeRef');
     has 'announcer'          => (is => 'rw', isa => 'Object', weak_ref => 1);
-    has 'subscriber'         => (is => 'rw', isa => 'Ref');
+    has 'subscriber'         => (is => 'rw', isa => 'Any');
     has 'announcement_class' => (
         is  => 'rw',
         isa => AnnouncementClass,

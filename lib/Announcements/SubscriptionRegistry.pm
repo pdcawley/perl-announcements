@@ -4,6 +4,9 @@ use Announcements::SubscriptionCollection;
 use Announcements::Exceptions;
 
 class Announcements::SubscriptionRegistry {
+    use feature ':5.10';
+    use Scalar::Util qw/refaddr/;
+
     has _subscriptions_by_class => (
         is => 'rw',
         isa => 'HashRef[Announcements::SubscriptionCollection]',
@@ -31,6 +34,16 @@ class Announcements::SubscriptionRegistry {
         $result;
     }
 
+    method subscriptions_of ($subscriber) {
+        $self->all_subscriptions->filter(
+            sub {
+                my $eachsub = $_->subscriber;
+                (ref($subscriber) || ref($eachsub))
+                    ? (refaddr($subscriber)||0) == (refaddr($eachsub)||0)
+                    : $eachsub ~~ $subscriber;
+            });
+    }
+
     method all_subscriptions {
         $self->subscriptions_for('Announcements::Announcement');
     }
@@ -39,6 +52,20 @@ class Announcements::SubscriptionRegistry {
         my $class = ref($ann);
 
         $self->subscriptions_for($class)->announce($ann);
+    }
+
+    method remove_subscriptions(Announcements::SubscriptionCollection $collection) {
+        $collection->each(sub { $self->remove_subscription($_) });
+    }
+
+    method remove_subscription(Announcements::Subscription $sub) {
+        my $key = $sub->announcement_class;
+        my $collection = $self->_subscriptions_by_class->{$key};
+        return unless $collection;
+        $collection->remove($sub);
+        if ($collection->is_empty) {
+            delete $self->_subscriptions_by_class->{$key};
+        }
     }
 
     method forget_subscriptions () {

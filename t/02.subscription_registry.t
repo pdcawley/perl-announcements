@@ -30,18 +30,32 @@ class Test02Subscriber {
 class Test02Announcement extends Announcements::Announcement {
 }
 
+sub announcer {
+    $_[0]->{announcer} //= Test02Announcer->new;
+}
+
 sub make_valid_subscription {
-    my($self, $announcement_class, $action) = (@_);
+    my($self, $announcement_class, $action, $subscriber) = (@_);
 
     $announcement_class //= 'Announcements::Announcement';
     $action //= sub { 1 };
 
     Announcements::Subscription->new(
         action             => $action,
-        announcer          => Test02Announcer->new,
+        announcer          => $self->announcer,
         announcement_class => $announcement_class,
-        subscriber         => Test02Subscriber->new
+        subscriber         => $subscriber // Test02Subscriber->new,
     );
+}
+
+sub test_subscriptions_of : Test(1) {
+    my $self = shift;
+    my $registry = $self->{registry};
+
+    $registry->register($self->make_valid_subscription(undef, undef, 'label1'));
+    $registry->register($self->make_valid_subscription('Test02Announcement', undef, 'label2'));
+
+    is +$registry->subscriptions_of('label1') => 1;
 }
 
 sub multiple_announcement_classes : Test(2) {

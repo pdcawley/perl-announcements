@@ -19,6 +19,24 @@ class Announcements::SubscriptionCollection {
         $self;
     }
 
+    method is_empty () {
+        ! $self->_subscriptions->size;
+    }
+
+    method remove (Announcements::Subscription $sub) {
+        $self->_subscriptions->remove($sub);
+    }
+
+    method filter (CodeRef $filter) {
+        my $ret = ref($self)->new;
+        $self->each(sub { $ret->add_subscription($_) if $filter->($_) });
+        return $ret;
+    }
+
+    method each (CodeRef $block) {
+        $block->($_) foreach @$self;
+    }
+
     method contains (Announcements::Subscription $sub) {
         $self->_subscriptions->member($sub);
     }
