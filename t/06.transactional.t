@@ -30,7 +30,7 @@ class ChangingValue extends ValueChangeAnnouncement {
 class ChangedValue extends ValueChangeAnnouncement {
 }
 
-class ValueHolder {
+class ValueHolder extends Announcements::Announcer {
     use feature ':5.10';
 
     my $announcer = Announcements::Announcer->new;
@@ -50,19 +50,23 @@ class ValueHolder {
         my $about_to_change
             = AboutToChangeValue->from_to_instance( $old_value, $value, $self);
 
-        $announcer->announce($about_to_change);
+        $self->announce($about_to_change);
         return if $about_to_change->is_vetoed;
         my $changing =
         ChangingValue->from_to_instance( $old_value, $value, $self);
-        $announcer->announce($changing);
+        $self->announce($changing);
         $self->$orig($changing->new_value);
-        $announcer->announce(ChangedValue->from_to_instance( $old_value, $self->$orig(), $self ));
+        $self->announce(ChangedValue->from_to_instance( $old_value, $self->$orig(), $self ));
+    }
+
+    after announce($announcement) {
+        $announcer->announce($announcement);
     }
 }
 
 package TransactionalTest;
 use feature ':5.10';
-use Test::More tests => 3;
+use Test::More tests => 5;
 
 my $announcer = ValueHolder->announcer;
 $announcer->when(
@@ -73,7 +77,7 @@ $announcer->when(
 
 my $vh = ValueHolder->new(value => 22);
 is $vh->value() => 22;
-$vh->value(33);
+$vh->value(value => 33);
 is $vh->value => 22;
 
 $announcer->forget_subscriptions;
@@ -85,3 +89,11 @@ $announcer->when(ChangingValue => sub {
 
 $vh->value(value =>"thingy");
 is $vh->value => "THINGY";
+
+my $vh2 = ValueHolder->new(value => 'immutable');
+$vh2->when(AboutToChangeValue => sub {$_[0]->veto});
+
+$vh2->value(value => 'mutable');
+is $vh2->value => 'immutable';
+$vh->value(value => 'mutable');
+is $vh->value => 'MUTABLE';

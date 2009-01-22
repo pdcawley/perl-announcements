@@ -8,7 +8,8 @@ class Announcements::Announcer {
     has subscription_registry => (
         is      => 'ro',
         isa     => 'Announcements::SubscriptionRegistry',
-        default => sub { Announcements::SubscriptionRegistry->new },
+        builder => 'make_subscription_registry',
+        lazy    => 1,
         handles => {
             _register => 'register',
             forget_subscriptions => 'forget_subscriptions',
@@ -17,8 +18,16 @@ class Announcements::Announcer {
 
     has subscription_class => (
         is      => 'rw',
-        default => 'Announcements::Subscription',
+        builder => 'default_subscription_class',
     );
+
+    method make_subscription_registry {
+        Announcements::SubscriptionRegistry->new;
+    }
+
+    method default_subscription_class {
+        'Announcements::Subscription';
+    }
 
     method when ($ac, CodeRef $action) {
         if (ref($ac) eq 'ARRAY') {
@@ -36,11 +45,11 @@ class Announcements::Announcer {
     }
 
     method announce ($announcement) {
-        $self->subscription_registry->announce($announcement->as_announcement)
+        $announcement = $announcement->as_announcement;
+        $self->subscription_registry->announce($announcement);
+        return $announcement;
     }
 }
-
-1; # Magic true value required at end of module
 __END__
 
 =head1 NAME
