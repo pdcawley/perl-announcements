@@ -15,6 +15,7 @@ class Announcements::Subscription {
     );
 
     method value (Announcement $announcement) {
+        local $_ = $announcement;
         $self->action->($announcement, $self->announcer, $self->subscriber);
     }
 
