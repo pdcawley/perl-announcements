@@ -39,7 +39,7 @@ class Announcements::Announcer {
         else {
             my $sub = $self->subscription_class->new(
                 action             => $action,
-                announcer          => $self,
+                announcer          > $self,
                 subscriber         => $for,
                 announcement_class => $ac,
             );
@@ -62,7 +62,7 @@ __END__
 
 =head1 NAME
 
-Announcements::Announcer - [One line description of module's purpose here]
+Announcements::Announcer - Dispatches announcements to subscribers
 
 
 =head1 VERSION
@@ -72,29 +72,77 @@ This document describes Announcements::Announcer version 0.0.1
 
 =head1 SYNOPSIS
 
-    use Announcements::Announcer;
+    use feature ':5.10';
+    use Announcements;
 
-=for author to fill in:
-    Brief code example(s) here showing commonest usage(s).
-    This section will be as far as many users bother reading
-    so make it as educational and exeplary as possible.
+    my $announcer = Announcements::Announcer->new();
+
+    $announcer->when(Announcements::Announcement => sub {
+        my ($announcement, $announcer, $subscriber) = (@_);
+        say "Got an announcement of class: ", ref($announcement);
+    });
+
+    # Elsewhere
+
+    package CustomAnnouncement;
+    use base 'Announcements::Announcement';
+
+    $announcer->announce('CustomAnnouncement');
+    # "Got an announcement of class: CustomAnnouncement"
 
 
 =head1 DESCRIPTION
 
-=for author to fill in:
-    Write a full description of the module and its features here.
-    Use subsections (=head2, =head3) as appropriate.
-
+Announcements::Announcer is responsible for managing subscriptions to
+announcements and sending those announcements on to subscribers as they
+happen.
 
 =head1 INTERFACE
 
-=for author to fill in:
-    Write a separate section listing the public components of the modules
-    interface. These normally consist of either subroutines that may be
-    exported, or methods that may be called on objects belonging to the
-    classes provided by the module.
+=head2 Instance methods
 
+=over 4
+
+=item B<when($class|@$classes, CodeRef $action, $subscriber?)>
+
+This function sets up subscriptions for the announcer, so that when an
+announcement of class C<$class> is made, the anonymous method C<$action> is
+called. C<$subscriber> is a key used to allow unsubscription later, it defaults
+C<$action>. If C<$class> is an array reference, it will create a subscription
+for each announcement class in the list.
+
+=item B<unsubscribe($subscriber)>
+
+This function removes any subscriptions added for the given C<$subscriber>
+(the third argument to C<when>).
+
+=item B<announce($announcement|$announcement_class)>
+
+This function finds all the subscriptions matching the C<$announcement>'s
+class and its superclasses and evaluates their actions. The action gets three
+arguments: C<$announcement>, the announcer object and the C<$subscriber> key
+passed to the C<when> that set up the subscription.
+
+=back
+
+=head2 Overrideable 'policy' methods
+
+=over 4
+
+=item B<make_subscription_registry>
+
+This method should return an object that acts like a
+L<Announcements::SubscriptionRegistry>. Defaults to making an instance of
+Announcements::SubscriptionRegistry.
+
+=item B<default_subscription_class>
+
+Defaults to L<Announcements::Subscription>.
+
+The class used by C<when> to make subscriptions. Should support the
+Announcements::Subscription protocol/role.
+
+=back
 
 =head1 DIAGNOSTICS
 
@@ -155,14 +203,12 @@ None reported.
 
 =head1 BUGS AND LIMITATIONS
 
-=for author to fill in:
-    A list of known problems with the module, together with some
-    indication Whether they are likely to be fixed in an upcoming
-    release. Also a list of restrictions on the features the module
-    does provide: data types that cannot be handled, performance issues
-    and the circumstances in which they may arise, practical
-    limitations on the size of data sets, special cases that are not
-    (yet) handled, etc.
+=head2 Limitations
+
+This should really be available as a role for mixing in to other concrete
+classes.
+
+=head2 Bugs
 
 No bugs have been reported.
 
