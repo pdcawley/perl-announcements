@@ -8,13 +8,16 @@ use Announcements;
 
 use MooseX::Declare;
 class Announcement1 extends Announcements::Announcement {
-    has 'message' => (is => 'rw', isa => 'Str');
+    has 'message' => (is => 'rw', isa => 'Str', default => '');
 }
 
 class Announcement2 extends Announcements::Announcement {
 }
 
 class Subscriber {
+    method process ($announcement) {
+        $announcement->message($announcement->message . ref($announcement));
+    }
 }
 
 use base qw(Test::Class);
@@ -95,6 +98,19 @@ sub test_announce_sets_dollar_underscore : Test(1) {
     $announcer->announce(Announcement1->new(message => 'message'));
 
     is $message => 'message', 'got announcement from $_';
+}
+
+sub test_when_send : Test(1) {
+    my $self = shift;
+    my $announcer = $self->make_announcer;
+
+    my $subscriber = Subscriber->new;
+
+    $announcer->when_send('Announcement1', send => 'process', to => $subscriber);
+    my $announcement = Announcement1->new;
+    $announcer->announce($announcement);
+
+    is($announcement->message(), 'Announcement1');
 }
 
 

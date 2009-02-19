@@ -39,12 +39,16 @@ class Announcements::Announcer {
         else {
             my $sub = $self->subscription_class->new(
                 action             => $action,
-                announcer          > $self,
+                announcer          => $self,
                 subscriber         => $for,
                 announcement_class => $ac,
             );
             $self->_register($sub);
         }
+    }
+
+    method when_send ($ac, :$send!, :$to!) {
+        $self->when($ac, sub { $to->$send(@_) });
     }
 
     method announce ($announcement) {
