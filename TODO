@@ -1,0 +1,10 @@
+* Think about making when_send the private interface and doing:
+
+    $announcer->when(AnnouncementClass)->send(method => $target);
+  
+  or possibly
+
+    $announcer->when(AnnouncementClass)->send('method')->to($target);
+
+  leaning towards the former, as, if nothing else, it's shorter and doesn't require 
+  the method name to be quoted.
